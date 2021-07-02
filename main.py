@@ -16,30 +16,43 @@ def max_simplex(cout_z, constraint, b):
     base_variable = [i for i in range(nb_variables, nb_variables + nb_constraint)]  # les indices de la base de départ
     couts_reduits = cout_z + [0 for i in range(nb_constraint)]  # initialisation des couts réduits
     bi = b
+    print("couts réduit  : ", couts_reduits)
 
+    # initialisation de la grande matrice
     grande_matrice = constraint
     for i in range(nb_constraint):
-        print("grandline i ",grande_matrice)
-        print("based depart i ",base_depart[i])
         grande_matrice[i] += base_depart[i]
+    grande_matrice += [couts_reduits]
+    print(grande_matrice)
 
-    grande_matrice += couts_reduits
+    # starting the simplex iteration
+    while is_table_positive(grande_matrice[nb_constraint]):  # tanque les couts réduits positifs
 
-    while is_table_positive(grande_matrice[nb_constraint]):
-        entrant_index = grande_matrice[nb_constraint].index(min(couts_reduits))
-        min_sortant = bi[0] / grande_matrice[entrant_index][0]
-        sortant_index = 0
-        for i in range(1, nb_constraint):
-            if grande_matrice[entrant_index][i] > 0:
-                if bi[i] / grande_matrice[entrant_index][i] < min_sortant:
-                    min_sortant = bi[i] / grande_matrice[entrant_index][i]
-                    sortant_index = i
+        entrant_index = grande_matrice[nb_constraint].index(min(couts_reduits))  # cherchant la variable entrante
+        sortant_index = -1
+        # cherchant la variable sortante
+        min_sortant = -1
+        beggin_index = -1
+        # on assure que touts ai sont positive
+        for i in range(nb_constraint):
+            if grande_matrice[i][entrant_index] > 0:
+                min_sortant = bi[i] / grande_matrice[i][entrant_index]
+                sortant_index = i
+                beggin_index = i
+                break
 
-        if min_sortant == bi[0] / grande_matrice[entrant_index][0] and constraint[0] <= 0:
+        if beggin_index == -1:
             return "solution infinie"
 
-        base_variable[base_variable.index(sortant_index)] = entrant_index
-    return grande_matrice[sortant_index][entrant_index]
+        # cherchons le plus petit bi/ai
+        for i in range(beggin_index + 1, nb_constraint):
+            if grande_matrice[i][entrant_index] > 0:
+                if (bi[i] / grande_matrice[i][entrant_index]) < min_sortant:
+                    min_sortant = bi[i] / grande_matrice[i][entrant_index]
+                    sortant_index = i  # variable sortante toruvée
+
+        base_variable[sortant_index] = entrant_index  # changeons les variablede base
+        return grande_matrice[sortant_index][entrant_index]
 
 
-print(max_simplex([-15, -14, 2], [[9, 7], [1, 1]], [100,12]))
+print(max_simplex([-15, -14], [[9, 7], [1, 1]], [100, 12]))
