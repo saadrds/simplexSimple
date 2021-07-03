@@ -16,6 +16,7 @@ def max_simplex(cout_z, constraint, b):
     base_variable = [i for i in range(nb_variables, nb_variables + nb_constraint)]  # les indices de la base de départ
     couts_reduits = cout_z + [0 for i in range(nb_constraint)]  # initialisation des couts réduits
     bi = b
+    z_res = 0
     print("couts réduit  : ", couts_reduits)
 
     # initialisation de la grande matrice
@@ -27,6 +28,7 @@ def max_simplex(cout_z, constraint, b):
     print(len(grande_matrice), 'and', grande_matrice[3][6])
 
     # starting the simplex iteration
+
     while is_table_positive(grande_matrice[nb_constraint]):  # tanque les couts réduits negative
         entrant_index = grande_matrice[nb_constraint].index(max(couts_reduits))  # cherchant la variable entrante
         sortant_index = -1
@@ -61,7 +63,7 @@ def max_simplex(cout_z, constraint, b):
                 copy[i][j] = grande_matrice[i][j]
 
         for i in range(nb_line):
-            if i != entrant_index:
+            if i != sortant_index:
                 grande_matrice[i][entrant_index] = 0
 
         for i in range(nb_column):
@@ -79,7 +81,10 @@ def max_simplex(cout_z, constraint, b):
                     grande_matrice[i][j] = ((copy[i][j] * pivot) - (
                                 copy[sortant_index][j] * copy[i][entrant_index])) / pivot
 
-        return "resuu", grande_matrice, "bi", bi
+        z_res = z_res + (new_bi[sortant_index] * copy[nb_line-1][entrant_index])/pivot
+
+
+    return "resuu", grande_matrice, "bi", bi, "z", z_res
 
 
 # Print(max_simplex([-15, -14], [[9, 7], [1, 1]], [100, 12]))
