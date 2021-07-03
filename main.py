@@ -24,10 +24,7 @@ def max_simplex(cout_z, constraint, b):
         grande_matrice[i] += base_depart[i]
     grande_matrice += [couts_reduits]
     print(grande_matrice)
-
-    for i in range(nb_constraint):
-        grande_matrice[i] += base_depart[i]
-    grande_matrice += [couts_reduits]
+    print(len(grande_matrice), 'and', grande_matrice[3][6])
 
     # starting the simplex iteration
     while is_table_positive(grande_matrice[nb_constraint]):  # tanque les couts réduits negative
@@ -56,27 +53,35 @@ def max_simplex(cout_z, constraint, b):
 
         base_variable[sortant_index] = entrant_index  # changeons les variablede base
         pivot = grande_matrice[sortant_index][entrant_index]
-        print("Le pivot ", grande_matrice[sortant_index][entrant_index])
+        nb_line = len(grande_matrice)
+        nb_column = len(grande_matrice[0])
+        copy = np.ones((nb_line, nb_column))
+        for i in range(nb_line):
+            for j in range(nb_column):
+                copy[i][j] = grande_matrice[i][j]
 
-
-        for i in range(len(grande_matrice)):
+        for i in range(nb_line):
             if i != entrant_index:
                 grande_matrice[i][entrant_index] = 0
 
-        for i in range(len(grande_matrice[0])):
+        for i in range(nb_column):
             grande_matrice[sortant_index][i] = grande_matrice[sortant_index][i] / pivot
 
-        for i in range(len(grande_matrice)):
-            if i != sortant_index:
-                for j in range(len(grande_matrice[0])):
-                    if j != entrant_index:
-                        grande_matrice[i][j] = ((grande_matrice[i][j] * pivot) - (grande_matrice[sortant_index][j] *
-                                                                                  grande_matrice[i][entrant_index])) \
-                                               / pivot
+        new_bi = [bi[i] for i in range(len(bi))]
+        print('new len grand j ', grande_matrice[0])
+        for i in range(nb_line):
+            if i == sortant_index:
+                bi[i] = bi[i] / pivot
+            elif i != len(bi):
+                bi[i] = ((new_bi[i] * pivot) - (new_bi[sortant_index]) * copy[i][entrant_index]) / pivot
+            for j in range(nb_column):
+                if j != entrant_index and i != sortant_index:
+                    grande_matrice[i][j] = ((copy[i][j] * pivot) - (
+                                copy[sortant_index][j] * copy[i][entrant_index])) / pivot
 
-        return "resuu", grande_matrice
+        return "resuu", grande_matrice, "bi", bi
 
 
-#Print(max_simplex([-15, -14], [[9, 7], [1, 1]], [100, 12]))
+# Print(max_simplex([-15, -14], [[9, 7], [1, 1]], [100, 12]))
 
 print(max_simplex([7, 9, 18, 17], [[2, 4, 5, 7], [1, 1, 2, 2], [1, 2, 3, 3]], [42, 17, 24]))
